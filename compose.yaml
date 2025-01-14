@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: clienteDB
+    environment:
+      - 'POSTGRES_DB=clienteDB'
+      - 'POSTGRES_PASSWORD=password'
+      - 'POSTGRES_USER=sa'
+    ports:
+      - '5434:5432'
