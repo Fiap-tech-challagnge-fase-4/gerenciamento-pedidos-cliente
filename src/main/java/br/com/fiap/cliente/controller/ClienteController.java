@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import br.com.fiap.cliente.Service.ClienteService;
+import br.com.fiap.cliente.service.ClienteService;
 import br.com.fiap.cliente.model.Cliente;
 
 import java.util.List;

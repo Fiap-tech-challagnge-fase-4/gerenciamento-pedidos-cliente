@@ -1,4 +1,4 @@
-package br.com.fiap.cliente.Service;
+package br.com.fiap.cliente.service;
 
 import java.util.List;
 import java.util.Optional;
