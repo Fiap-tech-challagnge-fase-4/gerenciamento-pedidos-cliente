@@ -1,5 +1,6 @@
 package br.com.fiap.cliente.model;
 
+import br.com.fiap.cliente.enums.StatusCliente;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,11 +12,11 @@ import lombok.Data;
 public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
     private String nome;
     private String documento;
     private String email;
     private String telefone;
     private String endereco;
-    private String status; 
+    private StatusCliente status;
 }

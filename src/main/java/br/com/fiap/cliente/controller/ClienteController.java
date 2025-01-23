@@ -1,46 +1,59 @@
 package br.com.fiap.cliente.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import br.com.fiap.cliente.service.ClienteService;
-import br.com.fiap.cliente.model.Cliente;
-
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.com.fiap.cliente.model.dto.ClienteRequestDTO;
+import br.com.fiap.cliente.model.dto.ClienteResponseDTO;
+import br.com.fiap.cliente.service.ClienteService;
 
 @RestController
 @RequestMapping("/api/cliente")
 public class ClienteController {
 
-    @Autowired
-    private ClienteService clienteService;
+	private final ClienteService clienteService;
 
-    @GetMapping
-    public List<Cliente> listarCliente() {
-        return clienteService.listarCliente();
-    }
+	public ClienteController(ClienteService clienteService) {
+		this.clienteService = clienteService;
+	}
 
-    @PostMapping
-    public Cliente criarCliente(@RequestBody Cliente cliente) {
-        return clienteService.criarCliente(cliente);
-    }
+	@GetMapping
+	public ResponseEntity<List<ClienteResponseDTO>> listarClientes() {
+		List<ClienteResponseDTO> clientesDTO = clienteService.listarClientes();
+		return ResponseEntity.ok(clientesDTO);
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Cliente> obterCliente(@PathVariable Integer id) {
-        Cliente cliente = clienteService.obterCliente(id);
-        return cliente != null ? ResponseEntity.ok(cliente) : ResponseEntity.notFound().build();
-    }
+	@PostMapping
+	public ResponseEntity<ClienteResponseDTO> criarCliente(@RequestBody ClienteRequestDTO clienteRequestDTO) {
+		ClienteResponseDTO clienteCriado = clienteService.criarCliente(clienteRequestDTO);
+		return ResponseEntity.status(201).body(clienteCriado);
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Cliente> atualizarCliente(@PathVariable Integer id, @RequestBody Cliente cliente) {
-        Cliente clienteAtualizado = clienteService.atualizarCliente(id, cliente);
-        return clienteAtualizado != null ? ResponseEntity.ok(clienteAtualizado) : ResponseEntity.notFound().build();
-    }
+	@GetMapping("/{id}")
+	public ResponseEntity<ClienteResponseDTO> obterClientePorId(@PathVariable Long id) {
+		ClienteResponseDTO cliente = clienteService.obterPorId(id);
+		return ResponseEntity.ok(cliente);
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluirCliente(@PathVariable Integer id) {
-        clienteService.excluirCliente(id);
-        return ResponseEntity.noContent().build();
-    }
+	@PutMapping("/{id}")
+	public ResponseEntity<ClienteResponseDTO> atualizarCliente(@PathVariable Long id,
+			@RequestBody ClienteRequestDTO clienteRequest) {
+		ClienteResponseDTO clienteAtualizado = clienteService.atualizarCliente(id, clienteRequest);
+		return ResponseEntity.ok(clienteAtualizado);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> excluirCliente(@PathVariable Long id) {
+		clienteService.excluirCliente(id);
+		return ResponseEntity.noContent().build();
+	}
 }
