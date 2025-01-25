@@ -17,7 +17,7 @@ import br.com.fiap.cliente.model.dto.ClienteResponseDTO;
 import br.com.fiap.cliente.service.ClienteService;
 
 @RestController
-@RequestMapping("/api/cliente")
+@RequestMapping("/api/clientes")
 public class ClienteController {
 
 	private final ClienteService clienteService;

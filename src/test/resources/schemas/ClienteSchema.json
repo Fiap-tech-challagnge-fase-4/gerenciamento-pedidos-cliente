@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ClienteResponseDTO",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "idCliente": {
+          "type": "integer"
+        },
+        "nome": {
+          "type": "string"
+        },
+        "documento": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "telefone": {
+          "type": "string"
+        },
+        "endereco": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+		  "enum": ["ATIVO", "DESATIVADO"] 
+        }
+      },
+      "required": ["idCliente", "nome", "documento", "email", "status"],
+      "additionalProperties": false
+    },
+    {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "idCliente": {
+            "type": "integer"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "documento": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telefone": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+       		"enum": ["ATIVO", "DESATIVADO"] 
+          }
+        },
+  		"required": ["idCliente", "nome", "documento", "email", "status"]
+      }
+    }
+  ]
+}
