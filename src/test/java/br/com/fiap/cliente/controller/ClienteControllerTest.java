@@ -4,8 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -128,16 +128,27 @@ class ClienteControllerTest {
 				.andExpect(jsonPath("$.endereco").value("Rua das Flores, 101"))
 				.andExpect(jsonPath("$.status").value(StatusCliente.ATIVO.getDescricao()));
 	}
-
+	
 	@Test
-	void devePermitirExcluirUmCliente() throws Exception {
+	void devePermitirDesativarUmCliente() throws Exception {
 		// Arrange
 		Long id = 1L;
-        doNothing().when(clienteService).excluirCliente(id);
+        doNothing().when(clienteService).desativarCliente(id);
 
 		// Act & Assert
-        mockMvc.perform(delete("/api/clientes/{id}", id))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(patch("/api/clientes/desativar/{id}", id))
+                .andExpect(status().isOk());
+	}
+	
+	@Test
+	void devePermitirAtivarUmCliente() throws Exception {
+		// Arrange
+		Long id = 1L;
+        doNothing().when(clienteService).ativarCliente(id);
+
+		// Act & Assert
+        mockMvc.perform(patch("/api/clientes/ativar/{id}", id))
+                .andExpect(status().isOk());
 	}
 
 	public static String asJsonString(final Object object) {

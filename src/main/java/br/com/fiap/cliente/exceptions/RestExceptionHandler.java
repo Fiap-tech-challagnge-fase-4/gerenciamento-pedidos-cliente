@@ -10,11 +10,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
+	
+	private static final String ERRO_PROCESSAR_REQUISICAO = "Erro ao processar a requisição: ";
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         Map<String, String> errors = new HashMap<>();
-        errors.put("Erro ao processar a requisição: ", ex.getMessage());
+        errors.put(ERRO_PROCESSAR_REQUISICAO, ex.getMessage());
+        
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put(ERRO_PROCESSAR_REQUISICAO, ex.getMessage());
         
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
@@ -22,7 +32,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEntityNotFoundException(EntityNotFoundException ex) {
         Map<String, String> errors = new HashMap<>();
-        errors.put("Erro ao processar a requisição: ", ex.getMessage());
+        errors.put(ERRO_PROCESSAR_REQUISICAO, ex.getMessage());
         
         return new ResponseEntity<>(errors, HttpStatus.NOT_FOUND);
     }

@@ -2,17 +2,12 @@ package br.com.fiap.cliente.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,6 +19,7 @@ import br.com.fiap.cliente.model.dto.ClienteRequestDTO;
 import br.com.fiap.cliente.model.dto.ClienteResponseDTO;
 import br.com.fiap.cliente.repository.ClienteRepository;
 
+@AutoConfigureTestDatabase
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ClienteServiceImplIT {
@@ -35,7 +31,7 @@ class ClienteServiceImplIT {
 	private ClienteService clienteService;
 	
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClienteRepository clienteRepository;	
 	
 	@Test
 	void devePermitirListarClientes() {
@@ -49,10 +45,10 @@ class ClienteServiceImplIT {
 		List<ClienteResponseDTO> listaClientes = clienteService.listarClientes();
 		
 		// Assert
-		assertThat(listaClientes).isNotEmpty().hasSizeGreaterThan(0);
-		assertThat(listaClientes).allSatisfy(cliente -> {
-			assertThat(cliente).isNotNull();
-		});
+		assertThat(listaClientes)
+	    .isNotEmpty()
+	    .hasSizeGreaterThan(0)
+	    .allSatisfy(cliente -> assertThat(cliente).isNotNull());
 	}
 	
 	@Test
@@ -95,18 +91,55 @@ class ClienteServiceImplIT {
 	}
 	
 	@Test
-	void devePermitirExcluirUmCliente() {
+	void devePermitirDesativarUmCliente() {
 		// Arrange
-		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
-				"Rua dos Ventos, 23", StatusCliente.ATIVO));
-		
+		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30",
+				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.ATIVO));
+
 		// Act
-		clienteService.excluirCliente(cliente.getId());
-		
+		clienteService.desativarCliente(cliente.getId());
+
 		// Assert
-		assertThatThrownBy(() -> clienteService.obterPorId(cliente.getId()))
-		.isInstanceOf(EntityNotFoundException.class)
-		.hasMessage("Cliente não encontrado.");
+		Cliente clienteAtualizado = clienteRepository.findById(cliente.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+		assertThat(clienteAtualizado.getStatus()).isEqualTo(StatusCliente.DESATIVADO);
+	}
+	
+	@Test
+	void deveGerarExceptionAoDesativarClienteJaDesativado() {
+		// Arrange
+		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30",
+				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.DESATIVADO));
+
+		// Act & Assert
+		assertThatThrownBy(() -> clienteService.desativarCliente(cliente.getId()))
+				.isInstanceOf(IllegalStateException.class).hasMessage("O cliente já está desativado.");
+	}
+	
+	@Test
+	void devePermitirAtivarUmCliente() {
+		// Arrange
+		Cliente cliente = clienteRepository.save(new Cliente(null, "Ryan Santos", "935.782.990-30",
+				"ryan.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.DESATIVADO));
+
+		// Act
+		clienteService.ativarCliente(cliente.getId());
+
+		// Assert
+		Cliente clienteAtualizado = clienteRepository.findById(cliente.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+		assertThat(clienteAtualizado.getStatus()).isEqualTo(StatusCliente.ATIVO);
+	}
+	
+	@Test
+	void deveGerarExceptionAoAtivarClienteJaAtivo() {
+		// Arrange
+		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30",
+				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.ATIVO));
+
+		// Act & Assert
+		assertThatThrownBy(() -> clienteService.ativarCliente(cliente.getId()))
+				.isInstanceOf(IllegalStateException.class).hasMessage("O cliente já está ativo.");
 	}
 	
 	@Test

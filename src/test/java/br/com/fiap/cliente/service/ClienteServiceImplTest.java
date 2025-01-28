@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.web.servlet.MockMvc;
 
 import br.com.fiap.cliente.enums.StatusCliente;
 import br.com.fiap.cliente.exceptions.EntityNotFoundException;
@@ -34,8 +32,6 @@ class ClienteServiceImplTest {
     private ClienteRepository clienteRepository;
     
     private ClienteServiceImpl clienteServiceImpl;
-    
-    private MockMvc mockMvc;
 
     private AutoCloseable openMocks;
     
@@ -60,10 +56,9 @@ class ClienteServiceImplTest {
 		
 		// Assert
 		verify(clienteRepository, times(1)).findAll();
-		assertThat(listaObtida).hasSize(3);
-		assertThat(listaObtida).allSatisfy( cliente -> {
-			assertThat(cliente).isNotNull().isInstanceOf(ClienteResponseDTO.class);
-		});
+		assertThat(listaObtida)
+	    .hasSize(3)
+	    .allSatisfy(cliente -> assertThat(cliente).isNotNull().isInstanceOf(ClienteResponseDTO.class));
 	}
 	
 	@Test
@@ -164,30 +159,71 @@ class ClienteServiceImplTest {
 	}
 	
 	@Test
-	void devePermitirExcluirUmCliente() {
+	void devePermitirDesativarUmCliente() {
 		// Arrange
-		Long idInexistente = 113123L;
-		when(clienteRepository.existsById(anyLong())).thenReturn(true);
-		doNothing().when(clienteRepository).deleteById(anyLong());
-		
+		Long id = 1L;
+		Cliente cliente = gerarUmCliente();
+		when(clienteRepository.findById(id)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
+
 		// Act
-		clienteServiceImpl.excluirCliente(idInexistente);
+		clienteServiceImpl.desativarCliente(id);
 		
 		// Assert
-		verify(clienteRepository, times(1)).existsById(anyLong());
-		verify(clienteRepository, times(1)).deleteById(anyLong());
+		verify(clienteRepository, times(1)).findById(anyLong());
+		verify(clienteRepository, times(1)).save(any(Cliente.class));
+		assertThat(cliente.getStatus()).isEqualTo(StatusCliente.DESATIVADO);
 	}
 	
 	@Test
-	void deveGerarExceptionAoExcluirUmClienteInexistente() {
+	void deveGerarExceptionAoDesativarClienteJaDesativado() {
 		// Arrange
-		Long idInexistente = 113123L;
-		when(clienteRepository.existsById(anyLong())).thenReturn(false);
-		
+		Long id = 1L;
+		Cliente cliente = gerarUmCliente();
+		cliente.setStatus(StatusCliente.DESATIVADO);
+		when(clienteRepository.findById(id)).thenReturn(Optional.of(cliente));
+
 		// Act & Assert
-		assertThatThrownBy(() -> clienteServiceImpl.excluirCliente(idInexistente))
-				.isInstanceOf(EntityNotFoundException.class)
-				.hasMessage("Cliente não encontrado.");
+		assertThatThrownBy(() -> clienteServiceImpl.desativarCliente(id))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessage("O cliente já está desativado.");
+		verify(clienteRepository, times(1)).findById(anyLong());
+		verify(clienteRepository, times(0)).save(any(Cliente.class));
+		assertThat(cliente.getStatus()).isEqualTo(StatusCliente.DESATIVADO);
+	}
+	
+	@Test
+	void devePermitirAtivarUmCliente() {
+		// Arrange
+		Long id = 1L;
+		Cliente cliente = gerarUmCliente();
+		cliente.setStatus(StatusCliente.DESATIVADO);
+		when(clienteRepository.findById(id)).thenReturn(Optional.of(cliente));
+		when(clienteRepository.save(any(Cliente.class))).thenReturn(cliente);
+
+		// Act
+		clienteServiceImpl.ativarCliente(id);
+		
+		// Assert
+		verify(clienteRepository, times(1)).findById(anyLong());
+		verify(clienteRepository, times(1)).save(any(Cliente.class));
+		assertThat(cliente.getStatus()).isEqualTo(StatusCliente.ATIVO);
+	}
+	
+	@Test
+	void deveGerarExceptionAoAtivarClienteJaAtivo() {
+		// Arrange
+		Long id = 1L;
+		Cliente cliente = gerarUmCliente();
+		when(clienteRepository.findById(id)).thenReturn(Optional.of(cliente));
+
+		// Act & Assert
+		assertThatThrownBy(() -> clienteServiceImpl.ativarCliente(id))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessage("O cliente já está ativo.");
+		verify(clienteRepository, times(1)).findById(anyLong());
+		verify(clienteRepository, times(0)).save(any(Cliente.class));
+		assertThat(cliente.getStatus()).isEqualTo(StatusCliente.ATIVO);
 	}
 	
 	private Cliente gerarUmCliente() {

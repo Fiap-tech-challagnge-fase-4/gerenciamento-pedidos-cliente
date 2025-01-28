@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import br.com.fiap.cliente.repository.ClienteRepository;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 
+@AutoConfigureTestDatabase
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ClienteControllerIT {
@@ -108,16 +110,29 @@ class ClienteControllerIT {
 	}
 	
 	@Test
-	void devePermitirExcluirUmCliente() {
+	void devePermitirDesativarUmCliente() {
 		// Arrange
-		Cliente cliente =  clienteRepository.save(new Cliente(null, "João Silva Pereira", "355.347.740-70", "joao.silva.pereira@email.com",
+		Cliente cliente =  clienteRepository.save(new Cliente(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
 				"98765-4321", "Rua das Flores, 101", StatusCliente.ATIVO));
 
 		// Act & Assert
 		given().filter(new AllureRestAssured())
-		.contentType(MediaType.APPLICATION_JSON_VALUE)
-		.when().delete("/api/clientes/{id}", cliente.getId())
-		.then().statusCode(HttpStatus.NO_CONTENT.value());
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when().patch("/api/clientes/desativar/{id}", cliente.getId())
+        .then().statusCode(HttpStatus.OK.value());
+	}
+	
+	@Test
+	void devePermitirAtivarUmCliente() {
+		// Arrange
+		Cliente cliente =  clienteRepository.save(new Cliente(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
+				"98765-4321", "Rua das Flores, 101", StatusCliente.DESATIVADO));
+
+		// Act & Assert
+		given().filter(new AllureRestAssured())
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when().patch("/api/clientes/ativar/{id}", cliente.getId())
+        .then().statusCode(HttpStatus.OK.value());
 	}
 
 	private ClienteRequestDTO gerarUmClienteRequestDTO() {

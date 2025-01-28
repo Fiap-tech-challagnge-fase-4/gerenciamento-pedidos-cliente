@@ -71,13 +71,31 @@ public class ClienteServiceImpl implements ClienteService {
 
 	@Override
 	@Transactional
-	public void excluirCliente(Long id) {
-		if (!clienteRepository.existsById(id)) {
-			throw new EntityNotFoundException("Cliente não encontrado.");
-		}
+    public void desativarCliente(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
 
-		clienteRepository.deleteById(id);
-	}
+        if (!cliente.isAtivo()) {
+            throw new IllegalStateException("O cliente já está desativado.");
+        }
+
+        cliente.setStatus(StatusCliente.DESATIVADO);
+        clienteRepository.save(cliente);
+    }
+	
+	@Override
+	@Transactional
+    public void ativarCliente(Long id) {
+        Cliente cliente = clienteRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+
+        if (!cliente.isDesativado()) {
+            throw new IllegalStateException("O cliente já está ativo.");
+        }
+
+        cliente.setStatus(StatusCliente.ATIVO);
+        clienteRepository.save(cliente);
+    }
 
 	public ClienteResponseDTO converterClienteEmClienteDTO(Cliente cliente) {
 		return new ClienteResponseDTO(cliente.getId(), cliente.getNome(), cliente.getDocumento(), cliente.getEmail(),

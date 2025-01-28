@@ -3,8 +3,8 @@ package br.com.fiap.cliente.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -51,9 +51,15 @@ public class ClienteController {
 		return ResponseEntity.ok(clienteAtualizado);
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> excluirCliente(@PathVariable Long id) {
-		clienteService.excluirCliente(id);
-		return ResponseEntity.noContent().build();
-	}
+    @PatchMapping("/ativar/{id}")
+    public ResponseEntity<Void> ativarCliente(@PathVariable Long id) {
+        clienteService.ativarCliente(id);
+        return ResponseEntity.ok().build();
+    }
+    
+    @PatchMapping("/desativar/{id}")
+    public ResponseEntity<Void> desativarCliente(@PathVariable Long id) {
+        clienteService.desativarCliente(id);
+        return ResponseEntity.ok().build();
+    }
 }

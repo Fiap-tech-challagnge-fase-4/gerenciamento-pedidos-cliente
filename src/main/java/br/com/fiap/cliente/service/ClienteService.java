@@ -18,5 +18,7 @@ public interface ClienteService {
 
     public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO cliente);
 
-    public void excluirCliente(Long id);
+    public void desativarCliente(Long id);
+    
+    public void ativarCliente(Long id);
 }

@@ -23,4 +23,12 @@ public class Cliente {
     private String telefone;
     private String endereco;
     private StatusCliente status;
+    
+    public boolean isAtivo() {
+        return StatusCliente.ATIVO.equals(this.status);
+    }
+    
+    public boolean isDesativado() {
+        return StatusCliente.DESATIVADO.equals(this.status);
+    }
 }
