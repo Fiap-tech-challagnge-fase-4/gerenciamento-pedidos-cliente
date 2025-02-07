@@ -7,98 +7,106 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.fiap.cliente.enums.StatusCliente;
 import br.com.fiap.cliente.exceptions.EntityNotFoundException;
+import br.com.fiap.cliente.mapper.ClienteMapper;
 import br.com.fiap.cliente.model.Cliente;
-import br.com.fiap.cliente.model.dto.ClienteRequestDTO;
-import br.com.fiap.cliente.model.dto.ClienteResponseDTO;
+import br.com.fiap.cliente.model.entity.ClienteEntity;
 import br.com.fiap.cliente.repository.ClienteRepository;
 import br.com.fiap.cliente.service.ClienteService;
 
 @Service
 public class ClienteServiceImpl implements ClienteService {
 
+	private final ClienteMapper clienteMapper;
 	private final ClienteRepository clienteRepository;
 
-	public ClienteServiceImpl(ClienteRepository clienteRepository) {
+	public ClienteServiceImpl(ClienteRepository clienteRepository, ClienteMapper clienteMapper) {
 		this.clienteRepository = clienteRepository;
+		this.clienteMapper = clienteMapper;
 	}
 
-	public List<ClienteResponseDTO> listarClientes() {
-		List<Cliente> clientes = clienteRepository.findAll();
-
-		return clientes.stream().map(this::converterClienteEmClienteDTO).toList();
-	}
-
-	@Override
-	@Transactional
-	public ClienteResponseDTO criarCliente(ClienteRequestDTO clienteRequest) {
-		Cliente cliente = new Cliente();
-		cliente.setNome(clienteRequest.nome());
-		cliente.setDocumento(clienteRequest.documento());
-		cliente.setEmail(clienteRequest.email());
-		cliente.setTelefone(clienteRequest.telefone());
-		cliente.setEndereco(clienteRequest.endereco());
-		cliente.setStatus(StatusCliente.ATIVO);
-
-		Cliente clienteSalvo = clienteRepository.save(cliente);
-
-		return converterClienteEmClienteDTO(clienteSalvo);
-	}
-
-	@Override
-	public ClienteResponseDTO obterPorId(Long id) {
-		Cliente cliente = clienteRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
-
-		return converterClienteEmClienteDTO(cliente);
+	public List<Cliente> listarClientes() {
+		List<ClienteEntity> clienteEntityList = clienteRepository.findAll();
+		return clienteEntityList.stream().map(clienteMapper::converterClienteEntityParaCliente).toList();
 	}
 
 	@Override
 	@Transactional
-	public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO clienteRequest) {
-		Cliente clienteRecuperado = clienteRepository.findById(id)
+	public Cliente criarCliente(Cliente cliente) {
+		ClienteEntity clienteEntity = new ClienteEntity();
+		clienteEntity.setNome(cliente.getNome());
+		clienteEntity.setDocumento(cliente.getDocumento());
+		clienteEntity.setEmail(cliente.getEmail());
+		clienteEntity.setTelefone(cliente.getTelefone());
+		clienteEntity.setEndereco(cliente.getEndereco());
+		clienteEntity.setCep(cliente.getCep());
+		clienteEntity.setStatus(cliente.getStatus());
+
+		ClienteEntity clienteSalvo = clienteRepository.save(clienteEntity);
+
+		return clienteMapper.converterClienteEntityParaCliente(clienteSalvo);
+	}
+
+	@Override
+	public Cliente obterPorId(Long id) {
+		ClienteEntity clienteEntity = clienteRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
 
-		clienteRecuperado.setNome(clienteRequest.nome());
-		clienteRecuperado.setDocumento(clienteRequest.documento());
-		clienteRecuperado.setEmail(clienteRequest.email());
-		clienteRecuperado.setTelefone(clienteRequest.telefone());
-		clienteRecuperado.setEndereco(clienteRequest.endereco());
+		return clienteMapper.converterClienteEntityParaCliente(clienteEntity);
+	}
 
-		Cliente clienteAtualizado = clienteRepository.save(clienteRecuperado);
+	@Override
+	@Transactional
+	public Cliente atualizarCliente(Long id, Cliente clienteRequest) {
+		ClienteEntity clienteEntityRecuperado = clienteRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
+		
+	    Cliente cliente = clienteMapper.converterClienteEntityParaCliente(clienteEntityRecuperado);
 
-		return converterClienteEmClienteDTO(clienteAtualizado);
+		if (cliente.isDesativado()) {
+			throw new IllegalStateException("O cliente informado não está ATIVO.");
+		}
+
+	    clienteEntityRecuperado.setNome(clienteRequest.getNome());
+	    clienteEntityRecuperado.setDocumento(clienteRequest.getDocumento());
+	    clienteEntityRecuperado.setEmail(clienteRequest.getEmail());
+	    clienteEntityRecuperado.setTelefone(clienteRequest.getTelefone());
+	    clienteEntityRecuperado.setEndereco(clienteRequest.getEndereco());
+	    clienteEntityRecuperado.setCep(clienteRequest.getCep());
+
+	    ClienteEntity clienteEntityAtualizado = clienteRepository.save(clienteEntityRecuperado);
+
+		return clienteMapper.converterClienteEntityParaCliente(clienteEntityAtualizado);
 	}
 
 	@Override
 	@Transactional
     public void desativarCliente(Long id) {
-        Cliente cliente = clienteRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+		ClienteEntity clienteEntity = clienteRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
+		
+	    Cliente cliente = clienteMapper.converterClienteEntityParaCliente(clienteEntity);
 
-        if (!cliente.isAtivo()) {
-            throw new IllegalStateException("O cliente já está desativado.");
+        if (cliente.isDesativado()) {
+            throw new IllegalStateException("O cliente já está DESATIVADO.");
         }
 
-        cliente.setStatus(StatusCliente.DESATIVADO);
-        clienteRepository.save(cliente);
+        clienteEntity.setStatus(StatusCliente.DESATIVADO);
+        clienteRepository.save(clienteEntity);
     }
 	
 	@Override
 	@Transactional
     public void ativarCliente(Long id) {
-        Cliente cliente = clienteRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
+		ClienteEntity clienteEntity = clienteRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
+		
+	    Cliente cliente = clienteMapper.converterClienteEntityParaCliente(clienteEntity);
 
-        if (!cliente.isDesativado()) {
-            throw new IllegalStateException("O cliente já está ativo.");
+        if (cliente.isAtivo()) {
+            throw new IllegalStateException("O cliente já está ATIVO.");
         }
 
-        cliente.setStatus(StatusCliente.ATIVO);
-        clienteRepository.save(cliente);
+        clienteEntity.setStatus(StatusCliente.ATIVO);
+        clienteRepository.save(clienteEntity);
     }
-
-	public ClienteResponseDTO converterClienteEmClienteDTO(Cliente cliente) {
-		return new ClienteResponseDTO(cliente.getId(), cliente.getNome(), cliente.getDocumento(), cliente.getEmail(),
-				cliente.getTelefone(), cliente.getEndereco(), cliente.getStatus());
-	}
 }

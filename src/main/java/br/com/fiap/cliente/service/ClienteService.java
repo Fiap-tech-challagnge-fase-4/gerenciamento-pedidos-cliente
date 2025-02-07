@@ -4,19 +4,18 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import br.com.fiap.cliente.model.dto.ClienteRequestDTO;
-import br.com.fiap.cliente.model.dto.ClienteResponseDTO;
+import br.com.fiap.cliente.model.Cliente;
 
 @Service
 public interface ClienteService {
  
-    public List<ClienteResponseDTO> listarClientes();
+    public List<Cliente> listarClientes();
 
-    public ClienteResponseDTO criarCliente(ClienteRequestDTO cliente);
+    public Cliente criarCliente(Cliente cliente);
 
-    public ClienteResponseDTO obterPorId(Long id);
+    public Cliente obterPorId(Long id);
 
-    public ClienteResponseDTO atualizarCliente(Long id, ClienteRequestDTO cliente);
+    public Cliente atualizarCliente(Long id, Cliente cliente);
 
     public void desativarCliente(Long id);
     
