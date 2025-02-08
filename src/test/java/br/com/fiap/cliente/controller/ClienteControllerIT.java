@@ -16,8 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
 import br.com.fiap.cliente.enums.StatusCliente;
-import br.com.fiap.cliente.model.Cliente;
 import br.com.fiap.cliente.model.dto.ClienteRequestDTO;
+import br.com.fiap.cliente.model.entity.ClienteEntity;
 import br.com.fiap.cliente.repository.ClienteRepository;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
@@ -56,6 +56,7 @@ class ClienteControllerIT {
 			.body("$", hasKey("email"))
 			.body("$", hasKey("telefone"))
 			.body("$", hasKey("endereco"))
+			.body("$", hasKey("cep"))
 			.body("$", hasKey("status"))
 			.body("idCliente", greaterThan(0));
 	}
@@ -63,13 +64,13 @@ class ClienteControllerIT {
 	@Test
 	void devePermitirListarUmClientePorId() {
 		// Arrange
-		Cliente cliente =  clienteRepository.save(new Cliente(1L, "João Silva", "355.347.740-70", "joao.silva@email.com",
-				"98765-4321", "Rua das Flores, 101", StatusCliente.ATIVO));
+		ClienteEntity clienteEntity =  clienteRepository.save(new ClienteEntity(1L, "João Silva", "355.347.740-70", "joao.silva@email.com",
+				"98765-4321", "Rua das Flores, 101", "04814-045", StatusCliente.ATIVO));
 
 		// Act & Assert
 		given().filter(new AllureRestAssured())
 	          .contentType(MediaType.APPLICATION_JSON_VALUE)
-	          .when().get("/api/clientes/{id}", cliente.getId())
+	          .when().get("/api/clientes/{id}", clienteEntity.getId())
 	          .then().statusCode(HttpStatus.OK.value())
 	          .body(matchesJsonSchemaInClasspath("./schemas/ClienteSchema.json"));
 	}
@@ -77,10 +78,10 @@ class ClienteControllerIT {
 	@Test
 	void devePermitirListarClientes() {
 		// Arrange
-		clienteRepository.save(new Cliente(1L, "João Silva", "355.347.740-70", "joao.silva@email.com", "98765-4321",
-				"Rua das Flores, 101", StatusCliente.ATIVO));
-		clienteRepository.save(new Cliente(2L, "Maisa Santos", "935.782.990-30", "maria.santos@email.com", "92365-4521",
-				"Rua dos Ventos, 23", StatusCliente.ATIVO));
+		clienteRepository.save(new ClienteEntity(1L, "João Silva", "355.347.740-70", "joao.silva@email.com", "98765-4321",
+				"Rua das Flores, 101", "03070-900", StatusCliente.ATIVO));
+		clienteRepository.save(new ClienteEntity(2L, "Maisa Santos", "935.782.990-30", "maria.santos@email.com", "92365-4521",
+				"Rua dos Ventos, 23", "08382-135", StatusCliente.ATIVO));
 
 		// Act & Assert
 		given().filter(new AllureRestAssured())
@@ -93,18 +94,18 @@ class ClienteControllerIT {
 	@Test
 	void devePermitirAtualizarUmCliente() {
 		// Arrange
-		Cliente cliente =  clienteRepository.save(new Cliente(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
-				"98765-4321", "Rua das Flores, 101", StatusCliente.ATIVO));
-		cliente.setEndereco("Rua do Teste, 123");
-		cliente.setEmail("email@teste.com.br");
+		ClienteEntity clienteEntity =  clienteRepository.save(new ClienteEntity(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
+				"98765-4321", "Rua das Flores, 101", "04326-000", StatusCliente.ATIVO));
+		clienteEntity.setEndereco("Rua do Teste, 123");
+		clienteEntity.setEmail("email@teste.com.br");
 		
-		ClienteRequestDTO clienteAtualizadoRequest = new ClienteRequestDTO(cliente.getNome(), cliente.getDocumento(),
-				cliente.getEmail(), cliente.getTelefone(), cliente.getEndereco());
+		ClienteRequestDTO clienteAtualizadoRequest = new ClienteRequestDTO(clienteEntity.getNome(), clienteEntity.getDocumento(),
+				clienteEntity.getEmail(), clienteEntity.getTelefone(), clienteEntity.getEndereco(), clienteEntity.getCep());
 
 		// Act & Assert
 		given().filter(new AllureRestAssured())
 			.contentType(MediaType.APPLICATION_JSON_VALUE).body(clienteAtualizadoRequest)
-			.when().put("/api/clientes/{id}", cliente.getId())
+			.when().put("/api/clientes/{id}", clienteEntity.getId())
 			.then().statusCode(HttpStatus.OK.value())
 			.body(matchesJsonSchemaInClasspath("./schemas/ClienteSchema.json"));
 	}
@@ -112,32 +113,32 @@ class ClienteControllerIT {
 	@Test
 	void devePermitirDesativarUmCliente() {
 		// Arrange
-		Cliente cliente =  clienteRepository.save(new Cliente(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
-				"98765-4321", "Rua das Flores, 101", StatusCliente.ATIVO));
+		ClienteEntity clienteEntity =  clienteRepository.save(new ClienteEntity(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
+				"98765-4321", "Rua das Flores, 101", "08031-086", StatusCliente.ATIVO));
 
 		// Act & Assert
 		given().filter(new AllureRestAssured())
         .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .when().patch("/api/clientes/desativar/{id}", cliente.getId())
+        .when().patch("/api/clientes/desativar/{id}", clienteEntity.getId())
         .then().statusCode(HttpStatus.OK.value());
 	}
 	
 	@Test
 	void devePermitirAtivarUmCliente() {
 		// Arrange
-		Cliente cliente =  clienteRepository.save(new Cliente(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
-				"98765-4321", "Rua das Flores, 101", StatusCliente.DESATIVADO));
+		ClienteEntity clienteEntity =  clienteRepository.save(new ClienteEntity(null, "João Silva", "355.347.740-70", "joao.silva@email.com",
+				"98765-4321", "Rua das Flores, 101", "03389-060", StatusCliente.DESATIVADO));
 
 		// Act & Assert
 		given().filter(new AllureRestAssured())
         .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .when().patch("/api/clientes/ativar/{id}", cliente.getId())
+        .when().patch("/api/clientes/ativar/{id}", clienteEntity.getId())
         .then().statusCode(HttpStatus.OK.value());
 	}
 
 	private ClienteRequestDTO gerarUmClienteRequestDTO() {
 		return new ClienteRequestDTO("João Silva", "123.456.789-01", "joao.silva@email.com", "98765-4321",
-				"Rua das Flores, 101");
+				"Rua das Flores, 101", "49045-190");
 	}
 
 }

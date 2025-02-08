@@ -15,8 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import br.com.fiap.cliente.enums.StatusCliente;
 import br.com.fiap.cliente.exceptions.EntityNotFoundException;
 import br.com.fiap.cliente.model.Cliente;
-import br.com.fiap.cliente.model.dto.ClienteRequestDTO;
-import br.com.fiap.cliente.model.dto.ClienteResponseDTO;
+import br.com.fiap.cliente.model.entity.ClienteEntity;
 import br.com.fiap.cliente.repository.ClienteRepository;
 
 @AutoConfigureTestDatabase
@@ -36,13 +35,13 @@ class ClienteServiceImplIT {
 	@Test
 	void devePermitirListarClientes() {
 		// Arrange
-		clienteRepository.save(new Cliente(1L, "João Silva", "355.347.740-70", "joao.silva@email.com", "98765-4321",
-				"Rua das Flores, 101", StatusCliente.ATIVO));
-		clienteRepository.save(new Cliente(2L, "Maisa Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
-				"Rua dos Ventos, 23", StatusCliente.ATIVO));
+		clienteRepository.save(new ClienteEntity(1L, "João Silva", "355.347.740-70", "joao.silva@email.com", "98765-4321",
+				"Rua das Flores, 101", "05115-070", StatusCliente.ATIVO));
+		clienteRepository.save(new ClienteEntity(2L, "Maisa Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
+				"Rua dos Ventos, 23", "03589-130", StatusCliente.ATIVO));
 		
 		// Act
-		List<ClienteResponseDTO> listaClientes = clienteService.listarClientes();
+		List<Cliente> listaClientes = clienteService.listarClientes();
 		
 		// Assert
 		assertThat(listaClientes)
@@ -54,53 +53,55 @@ class ClienteServiceImplIT {
 	@Test
 	void devePermitirRegistrarUmCliente() {
 		// Arrange
-		ClienteRequestDTO clienteRequest = gerarUmClienteRequestDTO();
+		Cliente clienteRequest = gerarUmCliente();
         
 		// Act
-		ClienteResponseDTO clienteResponse = clienteService.criarCliente(clienteRequest);
+		Cliente clienteResponse = clienteService.criarCliente(clienteRequest);
 		
 		// Assert
-		assertThat(clienteResponse).isInstanceOf(ClienteResponseDTO.class).isNotNull();
-		assertThat(clienteResponse.idCliente()).isNotNull();
-		assertThat(clienteResponse.nome()).isEqualTo(clienteRequest.nome());
-		assertThat(clienteResponse.documento()).isEqualTo(clienteRequest.documento());
-		assertThat(clienteResponse.email()).isEqualTo(clienteRequest.email());
-		assertThat(clienteResponse.telefone()).isEqualTo(clienteRequest.telefone());
-		assertThat(clienteResponse.endereco()).isEqualTo(clienteRequest.endereco());
-		assertThat(clienteResponse.status()).isEqualTo(StatusCliente.ATIVO);
+		assertThat(clienteResponse).isInstanceOf(Cliente.class).isNotNull();
+		assertThat(clienteResponse.getId()).isNotNull();
+		assertThat(clienteResponse.getNome()).isEqualTo(clienteRequest.getNome());
+		assertThat(clienteResponse.getDocumento()).isEqualTo(clienteRequest.getDocumento());
+		assertThat(clienteResponse.getEmail()).isEqualTo(clienteRequest.getEmail());
+		assertThat(clienteResponse.getTelefone()).isEqualTo(clienteRequest.getTelefone());
+		assertThat(clienteResponse.getEndereco()).isEqualTo(clienteRequest.getEndereco());
+		assertThat(clienteResponse.getCep()).isEqualTo(clienteRequest.getCep());
+		assertThat(clienteResponse.getStatus()).isEqualTo(StatusCliente.ATIVO);
 	}
 	
 	@Test
 	void devePermitirListarUmClientePorId() {
 		// Arrange
-		Cliente cliente = clienteRepository.save(new Cliente(null, "Maisa Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
-				"Rua dos Ventos, 23", StatusCliente.ATIVO));
+		ClienteEntity clienteEntity = clienteRepository.save(new ClienteEntity(null, "Maisa Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
+				"Rua dos Ventos, 23", "08050-005", StatusCliente.ATIVO));
 		
 		// Act
-		ClienteResponseDTO clienteResponse = clienteService.obterPorId(cliente.getId());
+		Cliente clienteResponse = clienteService.obterPorId(clienteEntity.getId());
 		
 		// Assert
-		assertThat(clienteResponse).isInstanceOf(ClienteResponseDTO.class).isNotNull();
-		assertThat(clienteResponse.idCliente()).isNotNull();
-		assertThat(clienteResponse.nome()).isEqualTo(cliente.getNome());
-		assertThat(clienteResponse.documento()).isEqualTo(cliente.getDocumento());
-		assertThat(clienteResponse.email()).isEqualTo(cliente.getEmail());
-		assertThat(clienteResponse.telefone()).isEqualTo(cliente.getTelefone());
-		assertThat(clienteResponse.endereco()).isEqualTo(cliente.getEndereco());
-		assertThat(clienteResponse.status()).isEqualTo(cliente.getStatus());
+		assertThat(clienteResponse).isInstanceOf(Cliente.class).isNotNull();
+		assertThat(clienteResponse.getId()).isNotNull();
+		assertThat(clienteResponse.getNome()).isEqualTo(clienteEntity.getNome());
+		assertThat(clienteResponse.getDocumento()).isEqualTo(clienteEntity.getDocumento());
+		assertThat(clienteResponse.getEmail()).isEqualTo(clienteEntity.getEmail());
+		assertThat(clienteResponse.getTelefone()).isEqualTo(clienteEntity.getTelefone());
+		assertThat(clienteResponse.getEndereco()).isEqualTo(clienteEntity.getEndereco());
+		assertThat(clienteResponse.getCep()).isEqualTo(clienteEntity.getCep());
+		assertThat(clienteResponse.getStatus()).isEqualTo(clienteEntity.getStatus());
 	}
 	
 	@Test
 	void devePermitirDesativarUmCliente() {
 		// Arrange
-		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30",
-				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.ATIVO));
+		ClienteEntity clienteEntity = clienteRepository.save(new ClienteEntity(null, "Maiara Santos", "935.782.990-30",
+				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", "02169-240", StatusCliente.ATIVO));
 
 		// Act
-		clienteService.desativarCliente(cliente.getId());
+		clienteService.desativarCliente(clienteEntity.getId());
 
 		// Assert
-		Cliente clienteAtualizado = clienteRepository.findById(cliente.getId())
+		ClienteEntity clienteAtualizado = clienteRepository.findById(clienteEntity.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
 		assertThat(clienteAtualizado.getStatus()).isEqualTo(StatusCliente.DESATIVADO);
 	}
@@ -108,25 +109,26 @@ class ClienteServiceImplIT {
 	@Test
 	void deveGerarExceptionAoDesativarClienteJaDesativado() {
 		// Arrange
-		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30",
-				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.DESATIVADO));
+		ClienteEntity clienteEntity = clienteRepository.save(new ClienteEntity(null, "Maiara Santos", "935.782.990-30",
+				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", "02357-097", StatusCliente.DESATIVADO));
+		Long id = clienteEntity.getId();
 
 		// Act & Assert
-		assertThatThrownBy(() -> clienteService.desativarCliente(cliente.getId()))
-				.isInstanceOf(IllegalStateException.class).hasMessage("O cliente já está desativado.");
+		assertThatThrownBy(() -> clienteService.desativarCliente(id))
+				.isInstanceOf(IllegalStateException.class).hasMessage("O cliente já está DESATIVADO.");
 	}
 	
 	@Test
 	void devePermitirAtivarUmCliente() {
 		// Arrange
-		Cliente cliente = clienteRepository.save(new Cliente(null, "Ryan Santos", "935.782.990-30",
-				"ryan.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.DESATIVADO));
+		ClienteEntity clienteEntity = clienteRepository.save(new ClienteEntity(null, "Ryan Santos", "935.782.990-30",
+				"ryan.santos@email.com", "92365-4521", "Rua dos Ventos, 23", "05790-390", StatusCliente.DESATIVADO));
 
 		// Act
-		clienteService.ativarCliente(cliente.getId());
+		clienteService.ativarCliente(clienteEntity.getId());
 
 		// Assert
-		Cliente clienteAtualizado = clienteRepository.findById(cliente.getId())
+		ClienteEntity clienteAtualizado = clienteRepository.findById(clienteEntity.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
 		assertThat(clienteAtualizado.getStatus()).isEqualTo(StatusCliente.ATIVO);
 	}
@@ -134,46 +136,49 @@ class ClienteServiceImplIT {
 	@Test
 	void deveGerarExceptionAoAtivarClienteJaAtivo() {
 		// Arrange
-		Cliente cliente = clienteRepository.save(new Cliente(null, "Maiara Santos", "935.782.990-30",
-				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", StatusCliente.ATIVO));
+		ClienteEntity clienteEntity = clienteRepository.save(new ClienteEntity(null, "Maiara Santos", "935.782.990-30",
+				"maisa.santos@email.com", "92365-4521", "Rua dos Ventos, 23", "04327-175", StatusCliente.ATIVO));
+		Long id = clienteEntity.getId();
 
 		// Act & Assert
-		assertThatThrownBy(() -> clienteService.ativarCliente(cliente.getId()))
-				.isInstanceOf(IllegalStateException.class).hasMessage("O cliente já está ativo.");
+		assertThatThrownBy(() -> clienteService.ativarCliente(id))
+				.isInstanceOf(IllegalStateException.class).hasMessage("O cliente já está ATIVO.");
 	}
 	
 	@Test
 	void devePermitirAtualizarUmCliente() {
 		// Arrange
-		Cliente clienteSemModificacao = gerarCliente();
-		Cliente clienteModificado = clienteRepository.save(gerarCliente());
+		ClienteEntity clienteSemModificacao = gerarClienteEntity();
+		ClienteEntity clienteModificado = clienteRepository.save(gerarClienteEntity());
 		clienteModificado.setNome("Nome Teste");
 		clienteModificado.setTelefone("11111-1111");
 		clienteModificado.setEndereco("Endereco Teste");
 		Long id = clienteModificado.getId();
-		ClienteRequestDTO clienteModificadoRequest = new ClienteRequestDTO(clienteModificado.getNome(), clienteModificado.getDocumento(),
-				clienteModificado.getEmail(), clienteModificado.getTelefone(), clienteModificado.getEndereco());
+		
+		Cliente clienteModificadoRequest = new Cliente(null, clienteModificado.getNome(), clienteModificado.getDocumento(),
+				clienteModificado.getEmail(), clienteModificado.getTelefone(), clienteModificado.getEndereco(), clienteModificado.getCep(), clienteModificado.getStatus());
 		
 		// Act
-		ClienteResponseDTO clienteObtido = clienteService.atualizarCliente(id, clienteModificadoRequest);
+		Cliente clienteObtido = clienteService.atualizarCliente(id, clienteModificadoRequest);
 		
 		// Assert
-		assertThat(clienteObtido).isInstanceOf(ClienteResponseDTO.class).isNotNull();
-		assertThat(clienteObtido.idCliente()).isEqualTo(id);
-		assertThat(clienteObtido.nome()).isNotEqualTo(clienteSemModificacao.getNome());
-		assertThat(clienteObtido.documento()).isEqualTo(clienteSemModificacao.getDocumento());
-		assertThat(clienteObtido.email()).isEqualTo(clienteSemModificacao.getEmail());
-		assertThat(clienteObtido.telefone()).isNotEqualTo(clienteSemModificacao.getTelefone());
-		assertThat(clienteObtido.endereco()).isNotEqualTo(clienteSemModificacao.getEndereco());
+		assertThat(clienteObtido).isInstanceOf(Cliente.class).isNotNull();
+		assertThat(clienteObtido.getId()).isEqualTo(id);
+		assertThat(clienteObtido.getNome()).isNotEqualTo(clienteSemModificacao.getNome());
+		assertThat(clienteObtido.getDocumento()).isEqualTo(clienteSemModificacao.getDocumento());
+		assertThat(clienteObtido.getEmail()).isEqualTo(clienteSemModificacao.getEmail());
+		assertThat(clienteObtido.getTelefone()).isNotEqualTo(clienteSemModificacao.getTelefone());
+		assertThat(clienteObtido.getEndereco()).isNotEqualTo(clienteSemModificacao.getEndereco());
+		assertThat(clienteObtido.getCep()).isEqualTo(clienteSemModificacao.getCep());
 	}
 
-	private Cliente gerarCliente() {
-		return new Cliente(null, "Maiara Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
-				"Rua dos Ventos, 23", StatusCliente.ATIVO);
+	private ClienteEntity gerarClienteEntity() {
+		return new ClienteEntity(null, "Maiara Santos", "935.782.990-30", "maisa.santos@email.com", "92365-4521",
+				"Rua dos Ventos, 23", "03813-340", StatusCliente.ATIVO);
 	}
 	
-	private ClienteRequestDTO gerarUmClienteRequestDTO() {
-		return new ClienteRequestDTO("João Silva", "123.456.789-01", "joao.silva@email.com",
-				"98765-4321", "Rua das Flores, 101");
+	private Cliente gerarUmCliente() {
+		return new Cliente(null, "João Silva", "123.456.789-01", "joao.silva@email.com",
+				"98765-4321", "Rua das Flores, 101", "04717-970");
 	}
 }

@@ -24,6 +24,9 @@
         "endereco": {
           "type": "string"
         },
+		"cep": {
+		  "type": "string"
+		},
         "status": {
           "type": "string",
 		  "enum": ["ATIVO", "DESATIVADO"] 
