@@ -1,4 +1,4 @@
-#  Sistema de Reserva e Avaliação de Restaurantes
+#  Microsserviço de Sistema de Gestão de Clientes
 
 Este projeto faz parte do *Tech Challenge - Fase 4*, nele foi construido um Microsserviço de Sistema de Gestão de Clientes com sua criação baseada na estrutura *MVC*, utilizando tecnologias modernas como *Java*, *Spring Boot* e *Docker*, com foco na usabilidade e na escalabilidade. O sistema permite o cadastro de clientes com informações detalhadas e o gerenciamento eficiente das informações.
 
