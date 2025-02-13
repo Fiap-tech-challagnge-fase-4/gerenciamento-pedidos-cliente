@@ -17,9 +17,7 @@ services:
       retries: 5
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: romulosousa865/ms-cliente-app:latest
     container_name: java_app_container
     depends_on:
       db:
