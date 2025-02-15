@@ -15,14 +15,10 @@ Este projeto faz parte do *Tech Challenge - Fase 4*, nele foi construido um Micr
    ```bash
    docker login
     ```
-2. **Baixe a imagem mais recente no Docker Hub:**
+2. **Execute o seguinte comando para subir os serviços:**
      ```bash
-    docker pull romulosousa865/ms-cliente-app:latest
+    docker compose up -d
     ```
-4. **Construa a imagem do projeto:**
-     ```bash
-    docker build -t romulosousa865/ms-cliente-app:latest .
-    ```    
 ## Instruções para Execução dos Testes
 
 - Comando para execução dos **Testes Unitários**:
