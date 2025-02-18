@@ -58,7 +58,7 @@ public class ClienteServiceImpl implements ClienteService {
 	@Transactional
 	public Cliente atualizarCliente(Long id, Cliente clienteRequest) {
 		ClienteEntity clienteEntityRecuperado = clienteRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado!"));
 		
 	    Cliente cliente = clienteMapper.converterClienteEntityParaCliente(clienteEntityRecuperado);
 
@@ -98,7 +98,7 @@ public class ClienteServiceImpl implements ClienteService {
 	@Transactional
     public void ativarCliente(Long id) {
 		ClienteEntity clienteEntity = clienteRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
+				.orElseThrow(() -> new EntityNotFoundException("Cliente não foi encontrado."));
 		
 	    Cliente cliente = clienteMapper.converterClienteEntityParaCliente(clienteEntity);
 
