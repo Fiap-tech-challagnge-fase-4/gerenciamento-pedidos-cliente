@@ -205,7 +205,7 @@
 						<artifactId>gatling-maven-plugin</artifactId>
 						<version>4.3.7</version>
 						<configuration>
-							<simulationClass>br.com.fiap.restaurante.performance.PerformanceSimulation</simulationClass>
+							<simulationClass>br.com.fiap.cliente.performance.PerformanceSimulation</simulationClass>
 						</configuration>
 					</plugin>
 				</plugins>
