@@ -10,6 +10,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5434:5432"
+    networks:
+      - app_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U sa -d clienteDB"]
       interval: 10s
@@ -18,7 +20,7 @@ services:
 
   app:
     image: romulosousa865/ms-cliente-app:latest
-    container_name: java_app_container
+    container_name: clienteApp
     depends_on:
       db:
         condition: service_healthy
@@ -30,7 +32,13 @@ services:
       - "8081:8081"
     volumes:
       - app_data:/app/data
+    networks:
+      - app_network
 
 volumes:
   postgres_data:
   app_data:
+
+networks:
+  app_network:
+    external: true
